@@ -1,0 +1,578 @@
+<html>
+<head>
+	<title>SWOLE</title>
+	<style>
+		body{
+			margin:none;
+			background-image:url('backgroundweb.jpg');
+			background-size:100% 100%;	
+			text-decoration: none;
+		}
+
+		#graphContainer{
+			margin:auto;
+			width:550px;
+			height:550px;
+			border-bottom: solid 1px white;
+			color: white;
+			font-family: avenir;
+			font-size: 40;
+		}
+
+		#labelsContainer{
+			width: 550px;
+			height: 50px;
+			margin: auto;
+			font-family: avenir;
+			color: white;
+			font-size: 10;
+		}
+
+		.dot {
+			width:10px;
+			bottom:10px;
+			position:relative;
+		}
+
+		.label {
+			width:10%;
+			float:left;
+			padding:2px;
+		}
+
+		#topbar{
+			height:3%;
+		}
+
+		.topRow{
+			width:240px;
+			height:20px;
+			font-family: avenir;
+			font-weight: bold;
+			font-size: 20;
+			color:white;
+			float:left;
+			text-align: center;
+			margin: 10px;
+			letter-spacing: 5px;
+			padding:5px;
+		}
+
+		#controls{
+			width:550px;
+			margin:auto;
+			text-align: center;
+			opacity: 0;
+		}
+
+		#logo{
+	        position: absolute;
+	        left:30px;
+	        top:30px;
+	        z-index: -200;
+   		 }
+
+   		 #swoles{
+   		 	width:50px;
+   		 }
+
+   		 #dotDetail{
+   		 	z-index: 100;
+   		 	font-family: avenir;
+   		 	font-size: 15;
+   		 	letter-spacing:5;
+   		 	margin: auto;
+   		 	color:white;
+   		 	text-align: center;
+   		 	position: absolute;
+   		 	right:33%;
+   		 	top:5%;
+   		 }
+
+   		 #instruct{
+   		 	width:70%;
+   		 	position:absolute;
+   		 	left:13%;
+   		 	top:2%;
+   		 	z-index:100;
+   		 }
+
+
+	</style>
+	<script src="jquery-2.1.3.min.js"></script>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script type="text/javascript" src="http://www.parsecdn.com/js/parse-latest.js"></script>
+	<script type="text/javascript">
+    Parse.initialize("NEFFpiwuHOpezYaOYvDwccpLItrrVcS1La4IWOuI", "i0AaFuJlfgs67YPFVxcpxOws72QWUAuudYvuIlr8");
+    var page = 0;
+    var dayArray = new Array();
+    var dayArrayPU = new Array();
+
+    var TestObject = Parse.Object.extend("Workout");
+
+    var query = new Parse.Query(TestObject);
+    //query.equalTo("playerName", "Dan Stemkoski");
+    query.find({
+      success: function(results) {
+    	 //alert("Successfully retrieved " + results.length + " scores.");
+        // Do something with the returned Parse.Object values
+        for (var i = 0; i < results.length; i++) {
+          var object = results[i];
+      //alert(object.id + ' - ' + object.get('createdAt') + ' - ' + object.get('number'));
+     		dayArrayPU[i] = object.get('number');
+     		dayArray[i] = object.get('date');
+        }
+      },
+     error: function(error) {
+        alert("Error: " + error.code + " " + error.message);
+      }
+    });
+
+
+	//var dayArrayPU = [9,10,5,2,3,2,6,4,9,2];
+	//var dayArray = ["30/10/15","31/10/15","01/11/15","02/11/15","03/11/15","04/11/15","05/11/15","06/11/15","07/11/15","08/11/15"];
+
+/*	var dayArray= new Array();
+	var dayArrayPU = new Array();
+
+		dayArray[0]=timeStampArray[0];
+		dayArrayPU[0]=timeStampArrayPU[0];
+		for (c=1;c<timeStampArray.length;c++) {
+			if(timeStampArray[c]=timeStampArray[c-1]){
+				//find the index number in dayArray[] that has that day already in it
+				for(d=0;d<dayArray.length;d++){
+					if(dayArray[d]=timeStampArray[c]){
+						dayArrayPU[d] = dayArrayPU[d] + timeStampArrayPU[c];
+					}
+				}
+			}
+			else{
+				dayArray[dayArray.length-1]= timeStampArray[c];
+				dayArrayPU[dayArrayPU.length-1]=timeStampArrayPU[c];
+			}
+		}
+*/
+
+	
+	
+			document.onkeydown = function(e) {
+			    switch (e.keyCode) {
+			        case 37:
+			            //alert('left');
+			            break;
+			        case 38:
+			            //alert('up');
+			            break;
+			        case 39:
+			            //alert('right');
+			            	dayFunction();
+			            	document.getElementById("controls").innerHTML='<div id="view" class="topRow">< DAY ></div><div id="type" class="topRow">TOTAL</div>'
+			            	$("#controls").animate({opacity:1},500);
+			            break;
+			        case 40:
+			            //alert('down');
+			            break;
+			    }
+			};
+
+function dayFunction(){
+		//array for current day
+		var page=1;
+		var date = new Date();
+		var dateDay = date.getDay();
+		var dateDate = date.getDate();
+		var dateMonth = date.getMonth();
+		var dateString = (date.getMonth()+1)+"/"+date.getDate()+"/"+date.getFullYear();
+
+		var TestObject = Parse.Object.extend("Workout");
+		var query = new Parse.Query(TestObject);
+		var numberOfPushupsToday = 0;
+		//alert(numberOfPushupsToday);
+	    query.equalTo("date", dateString);
+	    //alert("["+dateString+"]");
+	    query.find({
+	      success: function(results) {
+	    	 //alert("Successfully retrieved " + results.length + " scores.");
+	        // Do something with the returned Parse.Object values
+	        for (var i = 0; i < results.length; i++) {
+	          var object = results[i];
+	      //alert(object.id + ' - ' + object.get('createdAt') + ' - ' + object.get('number'));
+	     		//dayArrayPU[i] = object.get('number');
+	     		numberOfPushupsToday+=parseInt(object.get('number'));
+	     		//alert(numberOfPushupsToday);
+	        }
+
+	        dayArrayPU[dayArrayPU.length-1]=numberOfPushupsToday;
+
+	        document.getElementById("graphContainer").style.textAlign='center';
+			document.getElementById('graphContainer').innerHTML='<br><br><br><span style="font-size:150">'+numberOfPushupsToday+'</span><br>done today';
+	      },
+	     error: function(error) {
+	        alert("Error: " + error.code + " " + error.message);
+	      }
+	    });
+
+		//var PU = numberOfPushupsToday;//dayArrayPU[dayArrayPU.length-1];
+		
+
+		document.onkeydown = function(e) {
+			    switch (e.keyCode) {
+			        case 39:
+			            //alert('right');
+			            document.getElementById("graphContainer").style.textAlign='';
+			            weekFunction();
+			            break;
+			    }
+			};
+	}
+
+	function weekFunction(){
+		//array for weeks
+		var page=2;
+		var date = new Date();
+		var dateDay = date.getDay();
+		var dateDate = date.getDate();
+		var dateMonth = date.getMonth();
+
+		var weekArray= new Array();
+		var weekArrayPU = new Array();
+
+		//current week starting from the last sunday
+		for (e=0;e<=dateDay;e++){
+			weekArray[e]=dayArray[dayArray.length-1-e];
+			weekArrayPU[e]=dayArrayPU[dayArrayPU.length-1-e];
+			if(dateDay<6 && (dayArray.length%7)!=0){
+					for(f=dateDay+1;f<(7-dateDay);f++){
+						weekArray[f]="";
+						weekArrayPU[f]=0;
+					}
+				}
+		};
+		document.getElementById("view").innerHTML="<  WEEK  >";
+
+		document.getElementById("graphContainer").innerHTML='<img id="dot0" src="dot.png" class="dot"><img id="dot1" src="dot.png" class="dot"><img id="dot2" src="dot.png" class="dot"><img id="dot3" src="dot.png" class="dot"><img id="dot4" src="dot.png" class="dot"><img id="dot5" src="dot.png" class="dot"><img id="dot6" src="dot.png" class="dot">';
+
+		document.getElementById("labelsContainer").innerHTML='<div id="label0" class="label"></div><div id="label1" class="label"></div><div id="label2" class="label"></div><div id="label3" class="label"></div><div id="label4" class="label"></div><div id="label5" class="label"></div><div id="label6" class="label"></div>';
+
+		for(g=0;g<=6;g++){
+			document.getElementById("label"+g).innerHTML=weekArray[g];
+			var xposition = g*14;
+			var yposition = (80-((weekArrayPU[g]/(weekArrayPU[0]+weekArrayPU[1]+weekArrayPU[2]+weekArrayPU[3]+weekArrayPU[4]+weekArrayPU[5]+weekArrayPU[6]))*80))+19;
+			//document.getElementById("dot"+g).style.left = xposition+"%";
+			//document.getElementById("dot"+g).style.top = yposition+"%";
+			$("#dot"+g).animate({top: yposition+"%"},500).animate({left: xposition+"%"},500);
+		}
+
+			$("#dot0").mouseover(function(){
+				document.getElementById("dotDetail").innerHTML="YOU DID "+dayArrayPU[dayArrayPU.length-1]+" PROPER REPS ON SUNDAY";
+			});
+			$("#dot0").mouseout(function(){
+				document.getElementById("dotDetail").innerHTML="";
+			});
+			$("#dot1").mouseover(function(){
+				document.getElementById("dotDetail").innerHTML="YOU DID "+weekArrayPU[1]+" PROPER REPS ON MONDAY";
+			});
+			$("#dot1").mouseout(function(){
+				document.getElementById("dotDetail").innerHTML="";
+			});
+			$("#dot2").mouseover(function(){
+				document.getElementById("dotDetail").innerHTML="YOU DID "+weekArrayPU[2]+" PROPER REPS ON TUESDAY";
+			});
+			$("#dot2").mouseout(function(){
+				document.getElementById("dotDetail").innerHTML="";
+			});
+			$("#dot3").mouseover(function(){
+				document.getElementById("dotDetail").innerHTML="YOU DID "+weekArrayPU[3]+" PROPER REPS ON WEDNESDAY";
+			});
+			$("#dot3").mouseout(function(){
+				document.getElementById("dotDetail").innerHTML="";
+			});
+			$("#dot4").mouseover(function(){
+				document.getElementById("dotDetail").innerHTML="YOU DID "+weekArrayPU[4]+" PROPER REPS ON THURSDAY";
+			});
+			$("#dot4").mouseout(function(){
+				document.getElementById("dotDetail").innerHTML="";
+			});
+			$("#dot5").mouseover(function(){
+				document.getElementById("dotDetail").innerHTML="YOU DID "+weekArrayPU[5]+" PROPER REPS ON FRIDAY";
+			});
+			$("#dot5").mouseout(function(){
+				document.getElementById("dotDetail").innerHTML="";
+			});
+			$("#dot6").mouseover(function(){
+				document.getElementById("dotDetail").innerHTML="YOU DID "+weekArrayPU[6]+" PROPER REPS ON SATURDAY";
+			});
+			$("#dot6").mouseout(function(){
+				document.getElementById("dotDetail").innerHTML="";
+			});
+
+			document.onkeydown = function(e) {
+			    switch (e.keyCode) {
+			        case 37:
+			            //alert('left');
+			            document.getElementById("graphContainer").style.textAlign='';
+			            document.getElementById("view").innerHTML="<  DAY  >";
+			            document.getElementById("labelsContainer").innerHTML="";
+			            dayFunction();
+			            break;
+			        case 38:
+			            //alert('up');
+			            var sum = 0;
+			            	for(i=0;i<weekArray.length;i++){
+			            		var sum = sum + weekArrayPU[i];
+			            	}
+			            	var average = sum/(weekArrayPU.length);
+			            	var averageDisplay = average.toFixed(2);
+			            	document.getElementById("graphContainer").style.textAlign='center';
+			            	document.getElementById("graphContainer").innerHTML='<br><br><br><span style="font-size:150">'+averageDisplay+'</span><br>a day this week';
+			            	document.getElementById("type").innerHTML="AVERAGE";
+			            	document.getElementById("labelsContainer").innerHTML="";
+			            break;
+			        case 39:
+			            //alert('right');
+			            document.getElementById("graphContainer").style.textAlign='';
+			            document.getElementById("view").innerHTML="<  MONTH  >";
+			            document.getElementById("labelsContainer").innerHTML="";
+			            document.getElementById("type").innerHTML="TOTAL";
+			            monthFunction();
+			            break;
+			        case 40:
+			            //alert('down');
+			            document.getElementById("graphContainer").style.textAlign='';
+			            document.getElementById("type").innerHTML="TOTAL";
+			            document.getElementById("labelsContainer").innerHTML="";
+			            weekFunction();
+			            break;
+			    }
+			};
+	};
+
+	function monthFunction(){
+		//array for months
+		var page=3
+		var date = new Date();
+		var dateDay = date.getDay();
+		var dateDate = date.getDate();
+		var dateMonth = date.getMonth();
+		var monthArray= new Array();
+		var monthArrayPU = new Array();
+
+		//30-day
+		if (dateMonth=3||5||8||9||10){
+			for(z=0;z<=dateDate;z++){
+				monthArray[z]=dayArray[dayArray.length-dateDate+z];
+				monthArrayPU[z]=dayArrayPU[dayArray.length-dateDate+z];
+			}
+			for(a=dateDate;a<30;a++){
+				monthArray[a]="";
+				monthArrayPU[a]=0;
+			}
+
+			document.getElementById("graphContainer").innerHTML='<img id="dot0" src="dot.png" class="dot"><img id="dot1" src="dot.png" class="dot"><img id="dot2" src="dot.png" class="dot"><img id="dot3" src="dot.png" class="dot"><img id="dot4" src="dot.png" class="dot"><img id="dot5" src="dot.png" class="dot"><img id="dot6" src="dot.png" class="dot"><img id="dot7" src="dot.png" class="dot"><img id="dot8" src="dot.png" class="dot"><img id="dot9" src="dot.png" class="dot"><img id="dot10" src="dot.png" class="dot"><img id="dot11" src="dot.png" class="dot"><img id="dot12" src="dot.png" class="dot"><img id="dot13" src="dot.png" class="dot"><img id="dot14" src="dot.png" class="dot"><img id="dot15" src="dot.png" class="dot"><img id="dot16" src="dot.png" class="dot"><img id="dot17" src="dot.png" class="dot"><img id="dot18" src="dot.png" class="dot"><img id="dot19" src="dot.png" class="dot"><img id="dot20" src="dot.png" class="dot"><img id="dot21" src="dot.png" class="dot"><img id="dot22" src="dot.png" class="dot"><img id="dot23" src="dot.png" class="dot"><img id="dot24" src="dot.png" class="dot"><img id="dot25" src="dot.png" class="dot"><img id="dot26" src="dot.png" class="dot"><img id="dot27" src="dot.png" class="dot"><img id="dot28" src="dot.png" class="dot"><img id="dot29" src="dot.png" class="dot">';
+
+			for(g=0;g<30;g++){
+			var xposition = g*1.5;
+				var yposition = (80-((monthArrayPU[g]/(monthArrayPU[0]+monthArrayPU[1]+monthArrayPU[2]+monthArrayPU[3]+monthArrayPU[4]+monthArrayPU[5]+monthArrayPU[6]+monthArrayPU[7]+monthArrayPU[8]+monthArrayPU[9])+monthArrayPU[10]+monthArrayPU[11]+monthArrayPU[12]+monthArrayPU[13]+monthArrayPU[14]+monthArrayPU[15]+monthArrayPU[16]+monthArrayPU[17]+monthArrayPU[18]+monthArrayPU[19]+monthArrayPU[20]+monthArrayPU[21]+monthArrayPU[22]+monthArrayPU[23]+monthArrayPU[24]+monthArrayPU[25]+monthArrayPU[26]+monthArrayPU[27]+monthArrayPU[28]+monthArrayPU[29])*80))+19;
+			$("#dot"+g).animate({top: yposition+"%"},500).animate({left: xposition+"%"},500);
+
+			document.getElementById("labelsContainer").innerHTML='';
+
+	/*		for(i=0;i<30;i++){
+				$("#dot"+i).mouseover(function(){
+					document.getElementById("dotDetail").innerHTML="YOU DID "+monthArrayPU[i]+" PROPER REPS ON THIS DAY";
+				});
+				$("#dot"+i).mouseout(function(){
+					document.getElementById("dotDetail").innerHTML="";
+				});
+			}
+	*/
+			document.onkeydown = function(e) {
+			    switch (e.keyCode) {
+			        case 37:
+			            //alert('left');
+			            document.getElementById("graphContainer").style.textAlign='';
+			            document.getElementById("type").innerHTML="TOTAL";
+			            document.getElementById("view").innerHTML="<  WEEK  >";
+			            weekFunction();
+			            break;
+			        case 38:
+			            //alert('up');
+			            	var sum = 0;
+			            	for(i=0;i<monthArrayPU.length;i++){
+			            		var sum = sum + monthArrayPU[i];
+			            	}
+			            	var average = sum/(monthArray.length);
+			            	var averageDisplay = average.toFixed(2);
+			            	document.getElementById("graphContainer").style.textAlign='center';
+			            	document.getElementById("graphContainer").innerHTML='<br><br><br><span style="font-size:150">'+averageDisplay+'</span><br>a day this month';
+			            	document.getElementById("type").innerHTML="AVERAGE";
+			            	document.getElementById("labelsContainer").innerHTML="";
+			            break;
+			        case 39:
+			            //alert('right');
+			            break;
+			        case 40:
+			            //alert('down');
+			            	document.getElementById("graphContainer").style.textAlign='';
+			            	document.getElementById("type").innerHTML="TOTAL";
+			          		document.getElementById("labelsContainer").innerHTML="";
+			            	monthFunction();
+			            break;
+			    }
+			};
+		}
+		}
+
+		//31-day
+		else if (dateMonth=0||2||4||6||7||11){
+			for(i=0;i<=dateDate;i++){
+				monthArray[i]=dayArray[dayArray.length-dateDate+i];
+				monthArrayPU[i]=dayArrayPU[dayArray.length-dateDate+i];
+			}
+			for(a=dateDate+1;a<31;a++){
+				monthArray[a]=0;
+				monthArrayPU[a]=0;
+			}
+			document.getElementById("graphContainer").innerHTML='<img id="dot0" src="dot.png" class="dot"><img id="dot1" src="dot.png" class="dot"><img id="dot2" src="dot.png" class="dot"><img id="dot3" src="dot.png" class="dot"><img id="dot4" src="dot.png" class="dot"><img id="dot5" src="dot.png" class="dot"><img id="dot6" src="dot.png" class="dot"><img id="dot7" src="dot.png" class="dot"><img id="dot8" src="dot.png" class="dot"><img id="dot9" src="dot.png" class="dot"><img id="dot10" src="dot.png" class="dot"><img id="dot11" src="dot.png" class="dot"><img id="dot12" src="dot.png" class="dot"><img id="dot13" src="dot.png" class="dot"><img id="dot14" src="dot.png" class="dot"><img id="dot15" src="dot.png" class="dot"><img id="dot16" src="dot.png" class="dot"><img id="dot17" src="dot.png" class="dot"><img id="dot18" src="dot.png" class="dot"><img id="dot19" src="dot.png" class="dot"><img id="dot20" src="dot.png" class="dot"><img id="dot21" src="dot.png" class="dot"><img id="dot22" src="dot.png" class="dot"><img id="dot23" src="dot.png" class="dot"><img id="dot24" src="dot.png" class="dot"><img id="dot25" src="dot.png" class="dot"><img id="dot26" src="dot.png" class="dot"><img id="dot27" src="dot.png" class="dot"><img id="dot28" src="dot.png" class="dot"><img id="dot29" src="dot.png" class="dot"><img id="dot30" src="dot.png" class="dot">';
+
+			for(g=0;g<31;g++){
+			var xposition = g*1.5;
+			var yposition = (80-((monthArrayPU[g]/(monthArrayPU[0]+monthArrayPU[1]+monthArrayPU[2]+monthArrayPU[3]+monthArrayPU[4]+monthArrayPU[5]+monthArrayPU[6]+monthArrayPU[7]+monthArrayPU[8]+monthArrayPU[9])+monthArrayPU[10]+monthArrayPU[11]+monthArrayPU[12]+monthArrayPU[13]+monthArrayPU[14]+monthArrayPU[15]+monthArrayPU[16]+monthArrayPU[17]+monthArrayPU[18]+monthArrayPU[19]+monthArrayPU[20]+monthArrayPU[21]+monthArrayPU[22]+monthArrayPU[23]+monthArrayPU[24]+monthArrayPU[25]+monthArrayPU[26]+monthArrayPU[27]+monthArrayPU[28]+monthArrayPU[29]+monthArrayPU[30])*80))+19;
+			$("#dot"+g).animate({top: yposition+"%"},500).animate({left: xposition+"%"},500);
+
+			document.getElementById("labelsContainer").innerHTML='';
+
+			for(i=0;i<31;i++){
+				$("#dot"+i).mouseover(function(){
+					document.getElementById("dotDetail").innerHTML="YOU DID "+monthArrayPU[i]+" PROPER REPS ON THIS DAY";
+				});
+				$("#dot"+i).mouseout(function(){
+					document.getElementById("dotDetail").innerHTML="";
+				});
+			}
+
+			document.onkeydown = function(e) {
+			    switch (e.keyCode) {
+			        case 37:
+			            //alert('left');
+			            document.getElementById("graphContainer").style.textAlign='';
+			            document.getElementById("view").innerHTML="TOTAL";
+			            weekFunction();
+			            break;
+			        case 38:
+			            //alert('up');
+			            	var sum = 0;
+			            	for(i=0;i<monthArrayPU.length;i++){
+			            		var sum = sum + monthArrayPU[i];
+			            	}
+			            	var average = sum/(monthArrayPU.length);
+			            	var averageDisplay = average.toFixed(2);
+			            	document.getElementById("graphContainer").style.textAlign='center';
+			            	document.getElementById("graphContainer").innerHTML='<br><br><br><span style="font-size:150">'+averageDisplay+'</span><br>a day this month';
+			            	document.getElementById("type").innerHTML="AVERAGE";
+			            break;
+			        case 39:
+			            //alert('right');
+			            break;
+			        case 40:
+			            //alert('down');
+			            	document.getElementById("graphContainer").style.textAlign='';
+			            	document.getElementById("view").innerHTML="TOTAL";
+			            	monthFunction();
+			            break;
+			    }
+			};
+		}
+		}
+
+		//fucking february
+		else {
+			for(i=0;i<=dateDate;i++){
+				monthArray[i]=dayArray[dayArray.length-dateDate+i];
+				monthArrayPU[i]=dayArrayPU[dayArray.length-dateDate+i];
+			}
+			for(a=dateDate+1;a<28;a++){
+				monthArray[a]=0;
+				monthArrayPU[a]=0;
+			}
+			document.getElementById("graphContainer").innerHTML='<img id="dot0" src="dot.png" class="dot"><img id="dot1" src="dot.png" class="dot"><img id="dot2" src="dot.png" class="dot"><img id="dot3" src="dot.png" class="dot"><img id="dot4" src="dot.png" class="dot"><img id="dot5" src="dot.png" class="dot"><img id="dot6" src="dot.png" class="dot"><img id="dot7" src="dot.png" class="dot"><img id="dot8" src="dot.png" class="dot"><img id="dot9" src="dot.png" class="dot"><img id="dot10" src="dot.png" class="dot"><img id="dot11" src="dot.png" class="dot"><img id="dot12" src="dot.png" class="dot"><img id="dot13" src="dot.png" class="dot"><img id="dot14" src="dot.png" class="dot"><img id="dot15" src="dot.png" class="dot"><img id="dot16" src="dot.png" class="dot"><img id="dot17" src="dot.png" class="dot"><img id="dot18" src="dot.png" class="dot"><img id="dot19" src="dot.png" class="dot"><img id="dot20" src="dot.png" class="dot"><img id="dot21" src="dot.png" class="dot"><img id="dot22" src="dot.png" class="dot"><img id="dot23" src="dot.png" class="dot"><img id="dot24" src="dot.png" class="dot"><img id="dot25" src="dot.png" class="dot"><img id="dot26" src="dot.png" class="dot"><img id="dot27" src="dot.png" class="dot">';
+
+			for(g=0;g<28;g++){
+			var xposition = g*1.5;
+			var yposition = (80-((monthArrayPU[g]/(monthArrayPU[0]+monthArrayPU[1]+monthArrayPU[2]+monthArrayPU[3]+monthArrayPU[4]+monthArrayPU[5]+monthArrayPU[6]+monthArrayPU[7]+monthArrayPU[8]+monthArrayPU[9])+monthArrayPU[10]+monthArrayPU[11]+monthArrayPU[12]+monthArrayPU[13]+monthArrayPU[14]+monthArrayPU[15]+monthArrayPU[16]+monthArrayPU[17]+monthArrayPU[18]+monthArrayPU[19]+monthArrayPU[20]+monthArrayPU[21]+monthArrayPU[22]+monthArrayPU[23]+monthArrayPU[24]+monthArrayPU[25]+monthArrayPU[26]+monthArrayPU[27])*80))+19;
+			$("#dot"+g).animate({top: yposition+"%"},500).animate({left: xposition+"%"},500);
+
+			document.getElementById("labelsContainer").innerHTML='';
+
+			for(i=0;i<28;i++){
+				$("#dot"+i).mouseover(function(){
+					document.getElementById("dotDetail").innerHTML="YOU DID "+monthArrayPU[i]+" PROPER REPS ON THIS DAY";
+				});
+				$("#dot"+i).mouseout(function(){
+					document.getElementById("dotDetail").innerHTML="";
+				});
+			}
+
+			document.onkeydown = function(e) {
+			    switch (e.keyCode) {
+			        case 37:
+			            //alert('left');
+			            document.getElementById("graphContainer").style.textAlign='';
+			            document.getElementById("view").innerHTML="TOTAL";
+			            weekFunction();
+			            break;
+			        case 38:
+			            //alert('up');
+			            	var sum = 0;
+			            	for(i=0;i<monthArrayPU.length;i++){
+			            		var sum = sum + monthArrayPU[i];
+			            	}
+			            	var average = sum/monthArrayPU.length;
+			            	var averageDisplay=average.toFixed(2);
+			            	document.getElementById("graphContainer").style.textAlign='center';
+			            	document.getElementById("graphContainer").innerHTML='<br><br><br><span style="font-size:150">'+averageDisplay+'</span><br>a day this month';
+			            	document.getElementById("type").innerHTML="AVERAGE";
+			            break;
+			        case 39:
+			            //alert('right');
+			            break;
+			        case 40:
+			            //alert('down');
+			            	document.getElementById("graphContainer").style.textAlign='';
+			            	document.getElementById("view").innerHTML="TOTAL";
+			            	monthFunction();
+			            break;
+			    }
+			};
+		}
+
+	};
+}
+
+	//array for years
+	//var yearArray= new Array();
+	//var yearArrayPU = new Array();
+	</script>
+
+</head>
+
+<body>
+	 <div id = "topbar">
+        <div id="logo">
+        	<img id="swoles" src="swoles.png">
+        </div>
+	</div>
+	<div id="dotDetail"></div>
+
+	<div id="graphContainer">
+		<img id="instruct" src ="instructions.png">
+	</div>
+	<div id="labelsContainer"></div>
+
+	<div id="controls">
+	</div>
+
+
+
+</body>
+</html>
